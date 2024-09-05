@@ -62,9 +62,9 @@ $$P(no\ bag\ after\ 5\ min\ |\ bag\ on\ a\ plane) = \\
 
 $$P(bag\ on\ a\ plane) = 0.5$$ by default
 
-$$P(no\ bag\ after\ 5\ min) = MEAN(1 — P(arrived)) = 0.75$$ when the elapsed time is 5 min, MEAN is calculated over two cases: when the luggage was and was not transferred.
+$$P(no\ bag\ after\ 5\ min) = MEAN(1 — P(arrived)) = 0.75$$ when the elapsed time is $$5$$ min, MEAN is calculated over two cases: when the luggage was and was not transferred.
 
-So for the t = 5 min, we get:
+So for the $$t = 5$$ min, we get:
 
 $$P(bag\ on\ a\ plane\ |\ no\ bag\ after\ 5\ min) = 0.5 * 0.5 / 0.75 = 0.33$$
 
@@ -85,7 +85,7 @@ Let’s look at our data table again
 
 Updated table with the data
 
-Waiting for 5 minutes without observing the luggage affect the first $$5$$ minutes if the luggage was transferred. The probability becomes zero and is then redistributed.
+Waiting for $$5$$ minutes without observing the luggage affect the first $$5$$ minutes if the luggage was transferred. The probability becomes zero and is then redistributed.
 
 
 ![Data table after $$5$$ min of not seeing luggage.](../images/109bfbbbdc1d/1*WhaMwZqVolj1XLbBkwEdbA.png)
@@ -98,7 +98,7 @@ After excluding “nan” values representing prior knowledge, there are 5 tiles
 The idea is the same as for after $$5$$ minutes, see the data
 
 
-![Data table after 8 min of not seeing luggage.](../images/109bfbbbdc1d/1*AZiw2ssk30nfaZszoVskDA.png)
+![Data table after $$8$$ min of not seeing luggage.](../images/109bfbbbdc1d/1*AZiw2ssk30nfaZszoVskDA.png)
 
 Data table after $$8$$ min of not seeing luggage.
 
