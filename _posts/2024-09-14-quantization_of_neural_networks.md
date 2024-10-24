@@ -67,7 +67,8 @@ The next format is FP8, which is a half of FP16. It has 8 bits, and two versions
 | FP32   | 32   | 1    | 8        | 23       | $$10^{38}$$ | ~7.2      |
 | FP16   | 16   | 1    | 5        | 10       | $$10^{5}$$  | ~3.3      |
 | BF16   | 16   | 1    | 8        | 7        | $$10^{38}$$ | ~2        |
-| FP8    | 8    | 1    | 4        | 3        | $$10^{5}$$  | ~2        |
+| FP8 (E5M2)    | 8    | 1    | 4        | 2        | $$10^{5}$$  | ~2        |
+| FP8 (E4M3)    | 8    | 1    | 3        | 3        | $$10^{3}$$  | ~2        |
 
 
 # Example with simple network and number recognition
