@@ -129,7 +129,7 @@ for name, param in model.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
 
-```console
+```text
 fc1.weight is loaded in torch.float32
 fc1.bias is loaded in torch.float32
 fc2.weight is loaded in torch.float32
@@ -153,7 +153,7 @@ for name, param in model_fp16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
 
-```console
+```text
 Total size of the model:  0.485524
 fc1.weight is loaded in torch.float16
 fc1.bias is loaded in torch.float16
@@ -173,13 +173,13 @@ for name, param in model_bf16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
 
-```console
+```text
 Total size of the model:  0.485524 MB
 fc1.weight is loaded in torch.bfloat16
 fc1.bias is loaded in torch.bfloat16
 ...
 
-```console
+```text
 For FP8 we have two options: E5M2 and E4M3.
 ```python
 model_fp8_e4m3fn = model.to(dtype=torch.float8_e4m3fn)
@@ -191,7 +191,7 @@ model_fp8_e5m2 = model.to(dtype=torch.float8_e5m2)
 
 The size of the model is the same for both formats:
 
-```console
+```text
 Total size of the model:  0.242762 MB
 ```
 
@@ -265,7 +265,7 @@ def test(model, testloader):
 test_model(model, testloader)
 ```
 
-```console
+```text
 Accuracy of the model on the 10000 test images: 94.71%
 ```
 
@@ -277,7 +277,7 @@ model_fp16 = copy.deepcopy(model).half()
 test_model(model_fp16, testloader_fp16)
 ```
 
-```console
+```text
 Accuracy of the model on the 10000 test images: 94.72%
 ```
 
@@ -327,7 +327,7 @@ test_inference(testloader,
 
 ![img_digit](../images/nn_quant/img_digit.png)
 
-```console
+```text
 Prediction of FP32 model is 2, ground truth is 2
 Prediction of BF16 model is 2, ground truth is 2
 Prediction of FP16 model is 2, ground truth is 2
@@ -362,13 +362,13 @@ print(processor.decode(out[0], skip_special_tokens=True).strip())
 
 ![fp32](../images/nn_quant/img_blip.png)
 
-```console
+```text
 two cats laying on a couch
 ```
 
 If we run `!nvidia-smi`, we can see that the model is running on the GPU and the memory usage:
 
-```console
+```text
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.104.05             Driver Version: 535.104.05   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
@@ -411,13 +411,13 @@ with torch.no_grad():
 print(processor.decode(out[0], skip_special_tokens=True).strip())
 ```
 
-```console
+```text
 two cats laying on a couch
 ```
 
 Same as before. Let's check the memory usage.
 
-```console
+```text
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.104.05             Driver Version: 535.104.05   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
