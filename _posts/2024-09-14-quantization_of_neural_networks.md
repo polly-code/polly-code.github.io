@@ -61,7 +61,6 @@ The next format is FP8, which is a half of FP16. It has 8 bits, and two versions
 
 ### Summary on formats
 
-
 | Format | Bits | Sign | Exponent | Fraction | Max value | Precision |
 |--------|------|------|----------|----------|-----------|-----------|
 | FP32   | 32   | 1    | 8        | 23       | $$10^{38}$$ | ~7.2      |
@@ -70,8 +69,7 @@ The next format is FP8, which is a half of FP16. It has 8 bits, and two versions
 | FP8 (E5M2)    | 8    | 1    | 4        | 2        | $$10^{5}$$  | ~2        |
 | FP8 (E4M3)    | 8    | 1    | 3        | 3        | $$10^{3}$$  | ~2        |
 
-
-# Example with simple network and number recognition
+## Example with simple network and number recognition
 
 Let's create a simple network that recognizes numbers from 0 to 9. We will use the MNIST dataset. The network will consist of 2 convolutional layers and 2 fully connected layers. The network will be trained on the MNIST dataset and then we will quantize it to different formats.
 
@@ -100,18 +98,23 @@ transform = transforms.Compose(
 )
 
 # Download and load the training data
-trainset = datasets.MNIST("mnist_data", download=True, train=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=64, shuffle=True)
+trainset = datasets.MNIST("mnist_data", download=True, 
+train=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, 
+batch_size=64, shuffle=True)
 
 # Download and load the test data
-testset = datasets.MNIST("mnist_data", download=True, train=False, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=64, shuffle=False)
+testset = datasets.MNIST("mnist_data", download=True, 
+train=False, transform=transform)
+testloader = torch.utils.data.DataLoader(testset, 
+batch_size=64, shuffle=False)
 
 model = SimpleNN()
 
+byte_size = sum(p.element_size() * p.nelement() for p in model.parameters())
 print(
     "Total size of the model: ",
-    sum(p.element_size() * p.nelement() for p in model.parameters()) / 1_000_000,
+    byte_size / 1_000_000,
 )
 ```
 
@@ -120,11 +123,13 @@ Total size of the model:   0.971048 MB
 ```
 
 Let's check the format:
+
 ```python
 for name, param in model.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
-```
+
+```terminal
 fc1.weight is loaded in torch.float32
 fc1.bias is loaded in torch.float32
 fc2.weight is loaded in torch.float32
@@ -135,8 +140,8 @@ fc4.weight is loaded in torch.float32
 fc4.bias is loaded in torch.float32
 ```
 
-
 In order to cast the model parameters to FP16, we can use the following code:
+
 ```python
 model_fp16 = model.half()
 print(
@@ -146,7 +151,8 @@ print(
 for name, param in model_fp16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
-```
+
+```terminal
 Total size of the model:  0.485524
 fc1.weight is loaded in torch.float16
 fc1.bias is loaded in torch.float16
@@ -164,21 +170,26 @@ print(
 for name, param in model_bf16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
-```
+
+```terminal
 Total size of the model:  0.485524 MB
 fc1.weight is loaded in torch.bfloat16
 fc1.bias is loaded in torch.bfloat16
 ...
-```
+
+```terminal
 For FP8 we have two options: E5M2 and E4M3.
 ```python
 model_fp8_e4m3fn = model.to(dtype=torch.float8_e4m3fn)
 ```
+
 ```python
 model_fp8_e5m2 = model.to(dtype=torch.float8_e5m2)
 ```
+
 The size of the model is the same for both formats:
-```
+
+```terminal
 Total size of the model:  0.242762 MB
 ```
 
@@ -226,7 +237,8 @@ def train(model, trainloader, valloader, criterion, optimizer, epochs=5):
 
     return train_losses, val_losses
 
-train_losses, val_losses = train(model, trainloader, testloader, criterion, optimizer)
+train_losses, val_losses = train(model, 
+trainloader, testloader, criterion, optimizer)
 plt.plot(train_losses, label="Training loss")
 plt.plot(val_losses, label="Validation loss")
 plt.legend()
@@ -249,18 +261,23 @@ def test(model, testloader):
 
 test_model(model, testloader)
 ```
-```
+
+```terminal
 Accuracy of the model on the 10000 test images: 94.71%
 ```
+
 To test the model casted to FP16 we also have to cast the test images to FP16.
+
 ```python
 testloader_fp16 = [(images.half(), labels) for images, labels in testloader]
 model_fp16 = copy.deepcopy(model).half()
 test_model(model_fp16, testloader_fp16)
 ```
-```
+
+```terminal
 Accuracy of the model on the 10000 test images: 94.72%
 ```
+
 Unfortunately I don't have access to H100 or alike to measure accuracy with FP8, but I hope the idea is clear. However, I'd like show also inference on the test image.
 
 ```python
@@ -301,17 +318,120 @@ def test_inference(data_loader, dict_models, ind):
 
 test_inference(testloader, {'FP32':model, 'BF16':model_bf16, 'FP16':model_fp16}, 1)
 ```
+
 ![img_digit](../images/nn_quant/img_digit.png)
-```
+
+```terminal
 Prediction of FP32 model is 2, ground truth is 2
 Prediction of BF16 model is 2, ground truth is 2
 Prediction of FP16 model is 2, ground truth is 2
 ```
 
-# Conclusion
+## Real world example
 
-In this post, we discussed different floating point formats and how to cast a model to a different format. We also showed how to train a simple network on the MNIST dataset and how to quantize it to different formats. Additionally, we demonstrated how to test the accuracy of the model on the test dataset and how to make inferences on a single image.
+Example above is small and simple, ideal to grasp a concept. In the daily life we are dealing with much larger models. Let's consider a BLIP model `Salesforce/blip2-opt-2.7b` from Hugging Face, [link](https://huggingface.co/Salesforce/blip2-opt-2.7b).
+
+Let's get hands dirty and test it to FP16.
+
+```python
+model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b",
+    torch_dtype=torch.float16, device_map="auto")
+url = "http://images.cocodataset.org/val2017/000000039769.jpg" # was 9
+raw_image = Image.open(requests.get(url, stream=True).raw).convert('RGB')
+
+# show image
+plt.imshow(raw_image)
+plt.show()
+
+processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
+
+question = "Describe what is in the picture?"
+inputs = processor(images=raw_image, return_tensors="pt").to("cuda", torch.float16)
+with torch.no_grad():
+    with torch.autocast(device_type="cuda", dtype=torch.float16):
+        out = model.generate(**inputs)
+print(processor.decode(out[0], skip_special_tokens=True).strip())
+```
+
+```terminal
+two cats laying on a couch
+```
+
+If we run `!nvidia-smi`, we can see that the model is running on the GPU and the memory usage:
+
+```terminal
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.05             Driver Version: 535.104.05   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla T4                       Off | 00000000:00:04.0 Off |                    0 |
+| N/A   64C    P0              47W /  70W |   7837MiB / 15360MiB |     66%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
++---------------------------------------------------------------------------------------+
+```
+
+We see it takes 7.8 Gb of memory.
+Let's check what would be the output and the usage if we use FP32 version.
+
+```python
+model32 = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b",
+    torch_dtype=torch.float32, device_map="auto")
+url = "http://images.cocodataset.org/val2017/000000039769.jpg" # was 9
+
+raw_image = Image.open(requests.get(url, stream=True).raw).convert('RGB')
+processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
+
+question = "Describe what is in the picture?"
+inputs = processor(images=raw_image, return_tensors="pt").to("cuda", torch.float32)
+with torch.no_grad():
+    with torch.autocast(device_type="cuda", dtype=torch.float32):
+        out = model32.generate(**inputs)
+print(processor.decode(out[0], skip_special_tokens=True).strip())
+```
+
+```terminal
+two cats laying on a couch
+```
+
+Same as before. Let's check the memory usage.
+
+```terminal
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.104.05             Driver Version: 535.104.05   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Tesla T4                       Off | 00000000:00:04.0 Off |                    0 |
+| N/A   74C    P0              44W /  70W |  13451MiB / 15360MiB |     38%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
++---------------------------------------------------------------------------------------+
+```
+
+The memory usage is 13.5 Gb, which is almost twice as much as the FP16 version. This is a significant difference. You can imagine that in some cases you can't even load FP32 version of the model on the GPU. Moreover, for training, it needs more memory, for instance this model in FP16 version would need 28.9 Gb.
+
+## Conclusion
+
+In this post, we discussed different floating point formats and how to cast a model to a different format. We also showed how to train a simple network on the MNIST dataset and how to quantize it to different formats. Additionally, we demonstrated how to test the accuracy of the model on the test dataset and how to make inferences on a single image. Then we also showed how to load a real-world model in FP16 and FP32 and how to test the accuracy and memory usage of the model.
 
 For the convenience of the reader, the full code can be found in the Google colab notebook [here](https://colab.research.google.com/drive/14GsIGZTO24kI8lfTOQNWCM1W06IrXYuZ?usp=sharing).
 
-I hope you enjoyed this post and learned something new. If you have any questions or suggestions, please leave a comment below. Thank you for reading!
+I hope you enjoyed this post and learned something new. If you have any questions or suggestions, please feel free to reach out to me on [LinkedIn](https://www.linkedin.com/in/pavel-kos/). Thank you for reading!
