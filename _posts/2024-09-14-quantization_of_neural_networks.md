@@ -129,7 +129,7 @@ for name, param in model.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
 
-```terminal
+```console
 fc1.weight is loaded in torch.float32
 fc1.bias is loaded in torch.float32
 fc2.weight is loaded in torch.float32
@@ -146,13 +146,14 @@ In order to cast the model parameters to FP16, we can use the following code:
 model_fp16 = model.half()
 print(
     "Total size of the model: ",
-    sum(p.element_size() * p.nelement() for p in model_fp16.parameters()) / 1_000_000,
+    sum(p.element_size() * p.nelement() 
+    for p in model_fp16.parameters()) / 1_000_000,
 )
 for name, param in model_fp16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
 
-```terminal
+```console
 Total size of the model:  0.485524
 fc1.weight is loaded in torch.float16
 fc1.bias is loaded in torch.float16
@@ -165,19 +166,20 @@ Thus by using FP16 we reduced the size of the model by 50%. The same can be done
 model_bf16 = model.to(torch.bfloat16)
 print(
     "Total size of the model: ",
-    sum(p.element_size() * p.nelement() for p in model_bf16.parameters()) / 1_000_000,
+    sum(p.element_size() * p.nelement() 
+    for p in model_bf16.parameters()) / 1_000_000,
 )
 for name, param in model_bf16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
 ```
 
-```terminal
+```console
 Total size of the model:  0.485524 MB
 fc1.weight is loaded in torch.bfloat16
 fc1.bias is loaded in torch.bfloat16
 ...
 
-```terminal
+```console
 For FP8 we have two options: E5M2 and E4M3.
 ```python
 model_fp8_e4m3fn = model.to(dtype=torch.float8_e4m3fn)
@@ -189,7 +191,7 @@ model_fp8_e5m2 = model.to(dtype=torch.float8_e5m2)
 
 The size of the model is the same for both formats:
 
-```terminal
+```console
 Total size of the model:  0.242762 MB
 ```
 
@@ -257,12 +259,13 @@ def test(model, testloader):
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
-    print(f"Accuracy of the model on the 10000 test images: {100 * correct / total}%")
+    print(f"Accuracy of the model" \
+        f"on the 10000 test images: {100 * correct / total}%")
 
 test_model(model, testloader)
 ```
 
-```terminal
+```console
 Accuracy of the model on the 10000 test images: 94.71%
 ```
 
@@ -274,7 +277,7 @@ model_fp16 = copy.deepcopy(model).half()
 test_model(model_fp16, testloader_fp16)
 ```
 
-```terminal
+```console
 Accuracy of the model on the 10000 test images: 94.72%
 ```
 
@@ -314,14 +317,17 @@ def test_inference(data_loader, dict_models, ind):
         # Get the predicted class
         predicted_class = torch.argmax(output, dim=1).item()
         ground_truth = labels[ind].item()
-        print(f"Prediction of {tag} model is {predicted_class}, ground truth is {ground_truth}")
+        print(f"Prediction of {tag} model is " \
+            f"{predicted_class}, ground truth is {ground_truth}")
 
-test_inference(testloader, {'FP32':model, 'BF16':model_bf16, 'FP16':model_fp16}, 1)
+test_inference(testloader, 
+{'FP32':model, 'BF16':model_bf16, 'FP16':model_fp16}, 
+1)
 ```
 
 ![img_digit](../images/nn_quant/img_digit.png)
 
-```terminal
+```console
 Prediction of FP32 model is 2, ground truth is 2
 Prediction of BF16 model is 2, ground truth is 2
 Prediction of FP16 model is 2, ground truth is 2
@@ -346,20 +352,23 @@ plt.show()
 processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
 
 question = "Describe what is in the picture?"
-inputs = processor(images=raw_image, return_tensors="pt").to("cuda", torch.float16)
+inputs = processor(images=raw_image, 
+return_tensors="pt").to("cuda", torch.float16)
 with torch.no_grad():
     with torch.autocast(device_type="cuda", dtype=torch.float16):
         out = model.generate(**inputs)
 print(processor.decode(out[0], skip_special_tokens=True).strip())
 ```
 
-```terminal
+![fp32](../images/nn_quant/img_blip.png)
+
+```console
 two cats laying on a couch
 ```
 
 If we run `!nvidia-smi`, we can see that the model is running on the GPU and the memory usage:
 
-```terminal
+```console
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.104.05             Driver Version: 535.104.05   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
@@ -384,28 +393,31 @@ We see it takes 7.8 Gb of memory.
 Let's check what would be the output and the usage if we use FP32 version.
 
 ```python
-model32 = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b",
-    torch_dtype=torch.float32, device_map="auto")
-url = "http://images.cocodataset.org/val2017/000000039769.jpg" # was 9
+model32 = Blip2ForConditionalGeneration.from_pretrained(
+    "Salesforce/blip2-opt-2.7b",
+    torch_dtype=torch.float32, device_map="auto"
+    )
+url = "http://images.cocodataset.org/val2017/000000039769.jpg"
 
 raw_image = Image.open(requests.get(url, stream=True).raw).convert('RGB')
 processor = Blip2Processor.from_pretrained("Salesforce/blip2-opt-2.7b")
 
 question = "Describe what is in the picture?"
-inputs = processor(images=raw_image, return_tensors="pt").to("cuda", torch.float32)
+inputs = processor(images=raw_image, 
+return_tensors="pt").to("cuda", torch.float32)
 with torch.no_grad():
     with torch.autocast(device_type="cuda", dtype=torch.float32):
         out = model32.generate(**inputs)
 print(processor.decode(out[0], skip_special_tokens=True).strip())
 ```
 
-```terminal
+```console
 two cats laying on a couch
 ```
 
 Same as before. Let's check the memory usage.
 
-```terminal
+```console
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.104.05             Driver Version: 535.104.05   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
