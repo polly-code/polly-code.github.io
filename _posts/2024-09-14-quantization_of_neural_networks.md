@@ -29,7 +29,7 @@ $$V = (-1)^{sign}*2^{E-127}*(1+\sum_{i=1}^{23}b_{23-i}*2^{-i})$$
 
 For the further reading I refer you to wiki.
 
-It's important to note that FP32 can handle values up to $10^{38}$ and precision up to ~$7.2$ digits.
+It's important to note that FP32 can handle values up to $$10^{38}$$ and precision up to ~$$7.2$$ digits.
 
 ### Floating point 16 (FP16)
 
@@ -41,11 +41,11 @@ Every value `V` is defined by the formula:
 
 $$V = (-1)^{sign}*2^{E-15}*(1+\sum_{i=1}^{10}b_{10-i}*2^{-i})$$
 
-It's important to note that FP16 can handle values up to $10^{5}$ and precision up to ~$3.3$ digits.
+It's important to note that FP16 can handle values up to $$10^{5}$$ and precision up to ~$$3.3$$ digits.
 
 ### Brain floating point 16 (BF16)
 
-BF16 is a special case of FP16, where the exponent is 8 bits and the fraction is 7 bits. This format can handle values up to $10^{38}$ same as FP32 but precision only up to ~$2$ digits.
+BF16 is a special case of FP16, where the exponent is 8 bits and the fraction is 7 bits. This format can handle values up to $$10^{38}$$ same as FP32 but precision only up to ~$$2$$ digits.
 
 The next format is FP8, which is a half of FP16. It has 8 bits, where 1 bit indicates the sign, 4 bits define **Exponent** and 3 bits define **Fraction**.
 
@@ -57,17 +57,17 @@ $$V = (-1)^{sign}*2^{E-7}*(1+\sum_{i=1}^{3}b_{3-i}*2^{-i})$$
 
 ### FLoating point 8 (FP8)
 
-The next format is FP8, which is a half of FP16. It has 8 bits, and two versions: E5M2 and E4M3. The latter is subjectively more popular. E5M2 consists of 1 bit indicating the sign, 4 bits for **Exponent** and 2 bits for **Fraction**. E4M3 consists of 1 bit indicating the sign, 3 bits for **Exponent** and 3 bits for **Fraction**.E5M2 can handle values up to $10^{5}$ and E4M3 - up to $10^{3}$. More information you can find [here](https://arxiv.org/abs/2209.05433).
+The next format is FP8, which is a half of FP16. It has 8 bits, and two versions: E5M2 and E4M3. The latter is subjectively more popular. E5M2 consists of 1 bit indicating the sign, 4 bits for **Exponent** and 2 bits for **Fraction**. E4M3 consists of 1 bit indicating the sign, 3 bits for **Exponent** and 3 bits for **Fraction**.E5M2 can handle values up to $$10^{5}$$ and E4M3 - up to $$10^{3}$$. More information you can find [here](https://arxiv.org/abs/2209.05433).
 
 ### Summary on formats
 
 
 | Format | Bits | Sign | Exponent | Fraction | Max value | Precision |
 |--------|------|------|----------|----------|-----------|-----------|
-| FP32   | 32   | 1    | 8        | 23       | $10^{38}$ | ~7.2      |
-| FP16   | 16   | 1    | 5        | 10       | $10^{5}$  | ~3.3      |
-| BF16   | 16   | 1    | 8        | 7        | $10^{38}$ | ~2        |
-| FP8    | 8    | 1    | 4        | 3        | $10^{5}$  | ~2        |
+| FP32   | 32   | 1    | 8        | 23       | $$10^{38}$$ | ~7.2      |
+| FP16   | 16   | 1    | 5        | 10       | $$10^{5}$$  | ~3.3      |
+| BF16   | 16   | 1    | 8        | 7        | $$10^{38}$$ | ~2        |
+| FP8    | 8    | 1    | 4        | 3        | $$10^{5}$$  | ~2        |
 
 
 # Example with simple network and number recognition
@@ -117,6 +117,7 @@ print(
 ```bash
 Total size of the model:   0.971048 MB
 ```
+
 Let's check the format:
 ```python
 for name, param in model.named_parameters():
@@ -310,6 +311,6 @@ Prediction of FP16 model is 2, ground truth is 2
 
 In this post, we discussed different floating point formats and how to cast a model to a different format. We also showed how to train a simple network on the MNIST dataset and how to quantize it to different formats. Additionally, we demonstrated how to test the accuracy of the model on the test dataset and how to make inferences on a single image.
 
-For the convenience of the reader, the full code can be found [here](https://colab.research.google.com/drive/14GsIGZTO24kI8lfTOQNWCM1W06IrXYuZ?usp=sharing).
+For the convenience of the reader, the full code can be found in the Google colab notebook [here](https://colab.research.google.com/drive/14GsIGZTO24kI8lfTOQNWCM1W06IrXYuZ?usp=sharing).
 
 I hope you enjoyed this post and learned something new. If you have any questions or suggestions, please leave a comment below. Thank you for reading!
