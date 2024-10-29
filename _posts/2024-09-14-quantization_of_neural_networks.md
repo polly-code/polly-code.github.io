@@ -113,6 +113,7 @@ byte_size = sum(p.element_size() * p.nelement() for p in model.parameters())
 print(
     "Total size of the model: ",
     byte_size / 1_000_000,
+    ' MB',
 )
 ```
 
@@ -146,6 +147,7 @@ print(
     "Total size of the model: ",
     sum(p.element_size() * p.nelement() 
     for p in model_fp16.parameters()) / 1_000_000,
+    ' MB',
 )
 for name, param in model_fp16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
@@ -166,6 +168,7 @@ print(
     "Total size of the model: ",
     sum(p.element_size() * p.nelement() 
     for p in model_bf16.parameters()) / 1_000_000,
+    ' MB',
 )
 for name, param in model_bf16.named_parameters():
     print(f"{name} is loaded in {param.dtype}")
