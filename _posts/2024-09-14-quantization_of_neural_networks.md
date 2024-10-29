@@ -8,7 +8,7 @@ tags: ["machine-learning","python", "quantization", "optimization", "floating po
 description: "How to reduce the space a network takes up."
 ---
 
-Neural network can take up a lot of space and parameters are usually stored in Floating Point 32 format. For instance, there are Llama 3.1 7B, 40B and 405B models, where B stands for billions. Each FP32 parameter occupyes 32 bits, that is equal to 4 bytes. Thus, the three mentioned versions of LLMs would need 28 GB, 160 GB and 1'620 GB RAM, respectively.
+Neural networks can take up a lot of space and parameters are usually stored in Floating Point 32 format. For instance, there are Llama 3.1 7B, 40B and 405B models, where B stands for billions. Each FP32 parameter occupies 32 bits, which is equal to 4 bytes. Thus, the three mentioned versions of LLMs would need 28 GB, 160 GB and 1'620 GB RAM, respectively.
 
 This is a lot of RAM and there are ways how to reduce the size (almost) without affecting the accuracy. But before starting casting models to different formats let's delve into the basics and see what are the formats available in Python. Let's list some of them that we discuss in this post in regard to AI models.
 
@@ -19,7 +19,7 @@ This is a lot of RAM and there are ways how to reduce the size (almost) without 
 
 ### Floating point 32 (FP32)
 
-Let me introduce how Floating point number is organized on the example of FP32. It contains 32 bits, where 1 bit indicates the sign, 8 bits define **Exponent** and 23 bits define **Fraction**.
+Let me introduce how the Floating point number is organized in the example of FP32. It contains 32 bits, where 1 bit indicates the sign, 8 bits define the **Exponent** and 23 bits define the **Fraction**.
 
 ![fp32](../images/nn_quant/fp32.png)
 
@@ -27,13 +27,13 @@ Every value `V` is defined by the formula:
 
 $$V = (-1)^{sign}*2^{E-127}*(1+\sum_{i=1}^{23}b_{23-i}*2^{-i})$$
 
-For the further reading I refer you to wiki.
+For further reading, I refer you to the Wiki.
 
 It's important to note that FP32 can handle values up to $$10^{38}$$ and precision up to ~$$7.2$$ digits.
 
 ### Floating point 16 (FP16)
 
-The next format is FP16, which is a half of FP32. It has 16 bits, where 1 bit indicates the sign, 5 bits define **Exponent** and 10 bits define **Fraction**.
+The next format is FP16, which is half of FP32. It has 16 bits, where 1 bit indicates the sign, 5 bits define **Exponent** and 10 bits define **Fraction**.
 
 ![fp16](../images/nn_quant/fp16.png)
 
@@ -41,13 +41,11 @@ Every value `V` is defined by the formula:
 
 $$V = (-1)^{sign}*2^{E-15}*(1+\sum_{i=1}^{10}b_{10-i}*2^{-i})$$
 
-It's important to note that FP16 can handle values up to $$10^{5}$$ and precision up to ~$$3.3$$ digits.
+It's important to note that FP16 can handle values up to $$10^{5}$$ and precision up to ~$$3.3$$ digits. Thus the precision is worse and the range is smaller than in FP32.
 
 ### Brain floating point 16 (BF16)
 
 BF16 is a special case of FP16, where the exponent is 8 bits and the fraction is 7 bits. This format can handle values up to $$10^{38}$$ same as FP32 but precision only up to ~$$2$$ digits.
-
-The next format is FP8, which is a half of FP16. It has 8 bits, where 1 bit indicates the sign, 4 bits define **Exponent** and 3 bits define **Fraction**.
 
 ![bf16](../images/nn_quant/bf16.png)
 
@@ -55,9 +53,9 @@ Every value `V` is defined by the formula:
 
 $$V = (-1)^{sign}*2^{E-7}*(1+\sum_{i=1}^{3}b_{3-i}*2^{-i})$$
 
-### FLoating point 8 (FP8)
+### Floating point 8 (FP8)
 
-The next format is FP8, which is a half of FP16. It has 8 bits, and two versions: E5M2 and E4M3. The latter is subjectively more popular. E5M2 consists of 1 bit indicating the sign, 4 bits for **Exponent** and 2 bits for **Fraction**. E4M3 consists of 1 bit indicating the sign, 3 bits for **Exponent** and 3 bits for **Fraction**.E5M2 can handle values up to $$10^{5}$$ and E4M3 - up to $$10^{3}$$. More information you can find [here](https://arxiv.org/abs/2209.05433).
+The next format is FP8, which is half of FP16. It has 8 bits, and two versions: E5M2 and E4M3. The latter is subjectively more popular. E5M2 consists of 1 bit indicating the sign, 4 bits for **Exponent**, and 2 bits for **Fraction**. E4M3 consists of 1 bit indicating the sign, 3 bits for **Exponent**, and 3 bits for **Fraction**.E5M2 can handle values up to $$10^{5}$$ and E4M3 - up to $$10^{3}$$. For more information, you can find [here](https://arxiv.org/abs/2209.05433).
 
 ### Summary on formats
 
@@ -69,7 +67,7 @@ The next format is FP8, which is a half of FP16. It has 8 bits, and two versions
 | FP8 (E5M2)    | 8    | 1    | 4        | 2        | $$10^{5}$$  | ~2        |
 | FP8 (E4M3)    | 8    | 1    | 3        | 3        | $$10^{3}$$  | ~2        |
 
-## Example with simple network and number recognition
+## Simple network and number recognition
 
 Let's create a simple network that recognizes numbers from 0 to 9. We will use the MNIST dataset. The network will consist of 2 convolutional layers and 2 fully connected layers. The network will be trained on the MNIST dataset and then we will quantize it to different formats.
 
@@ -160,7 +158,7 @@ fc1.bias is loaded in torch.float16
 ...
 ```
 
-Thus by using FP16 we reduced the size of the model by 50%. The same can be done with BF16 and FP8.
+Thus by using FP16, we reduced the size of the model by 50%. The same can be done with BF16 and FP8.
 
 ```python
 model_bf16 = model.to(torch.bfloat16)
@@ -179,8 +177,10 @@ fc1.weight is loaded in torch.bfloat16
 fc1.bias is loaded in torch.bfloat16
 ...
 
-```text
+```
+
 For FP8 we have two options: E5M2 and E4M3.
+
 ```python
 model_fp8_e4m3fn = model.to(dtype=torch.float8_e4m3fn)
 ```
@@ -281,7 +281,7 @@ test_model(model_fp16, testloader_fp16)
 Accuracy of the model on the 10000 test images: 94.72%
 ```
 
-Unfortunately I don't have access to H100 or alike to measure accuracy with FP8, but I hope the idea is clear. However, I'd like show also inference on the test image.
+Unfortunately, I don't have access to H100 or hardware that support FP8 to measure accuracy with FP8, but I hope the idea is clear. However, I'd like to show also inference on the test image.
 
 ```python
 def test_inference(data_loader, dict_models, ind):
@@ -333,11 +333,11 @@ Prediction of BF16 model is 2, ground truth is 2
 Prediction of FP16 model is 2, ground truth is 2
 ```
 
-## Real world example
+## Real-world example
 
-Example above is small and simple, ideal to grasp a concept. In the daily life we are dealing with much larger models. Let's consider a BLIP model `Salesforce/blip2-opt-2.7b` from Hugging Face, [link](https://huggingface.co/Salesforce/blip2-opt-2.7b).
+The example above is small and simple, ideal for grasping a concept. In daily life, we are dealing with much larger models. Let's consider a BLIP model `Salesforce/blip2-opt-2.7b` from Hugging Face, [link](https://huggingface.co/Salesforce/blip2-opt-2.7b).
 
-Let's get hands dirty and test it to FP16.
+Let's get our hands dirty and test it to FP16.
 
 ```python
 model = Blip2ForConditionalGeneration.from_pretrained("Salesforce/blip2-opt-2.7b",
@@ -389,8 +389,8 @@ If we run `!nvidia-smi`, we can see that the model is running on the GPU and the
 +---------------------------------------------------------------------------------------+
 ```
 
-We see it takes 7.8 Gb of memory.
-Let's check what would be the output and the usage if we use FP32 version.
+We see it takes 7.8 GB of memory.
+Let's check what would be the output and the usage if we use the FP32 version.
 
 ```python
 model32 = Blip2ForConditionalGeneration.from_pretrained(
@@ -438,11 +438,11 @@ Same as before. Let's check the memory usage.
 +---------------------------------------------------------------------------------------+
 ```
 
-The memory usage is 13.5 Gb, which is almost twice as much as the FP16 version. This is a significant difference. You can imagine that in some cases you can't even load FP32 version of the model on the GPU. Moreover, for training, it needs more memory, for instance this model in FP16 version would need 28.9 Gb.
+The memory usage is 13.5 GB, which is almost twice as much as the FP16 version. This is a significant difference. You can imagine that in some cases you can't even load the FP32 version of the model on the GPU. Moreover, for training, it needs more memory, for instance, this model in the FP16 version would need 28.9 GB.
 
 ## Conclusion
 
-In this post, we discussed different floating point formats and how to cast a model to a different format. We also showed how to train a simple network on the MNIST dataset and how to quantize it to different formats. Additionally, we demonstrated how to test the accuracy of the model on the test dataset and how to make inferences on a single image. Then we also showed how to load a real-world model in FP16 and FP32 and how to test the accuracy and memory usage of the model.
+In this post, we discussed different floating point formats and how to cast a model into a different format. We also showed how to train a simple network on the MNIST dataset and how to quantize it into different formats. Additionally, we demonstrated how to test the accuracy of the model on the test dataset and how to make inferences on a single image. Then we also showed how to load a real-world model in FP16 and FP32 and how to test the accuracy and memory usage of the model.
 
 For the convenience of the reader, the full code can be found in the Google colab notebook [here](https://colab.research.google.com/drive/14GsIGZTO24kI8lfTOQNWCM1W06IrXYuZ?usp=sharing).
 
