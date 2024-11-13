@@ -1,8 +1,8 @@
 ---
 title: "Quantization of neural networks: integers"
 author: "Pavel Kos"
-date: 
-last_modified_at: 
+date: 2024-11-12T22:20:32.501+0000
+last_modified_at: 2024-11-13T12:20:32.501+0000
 categories: ""
 tags: ["machine-learning","python", "quantization", "optimization", "integers"]
 description: "How to reduce the space a network takes up even further."
