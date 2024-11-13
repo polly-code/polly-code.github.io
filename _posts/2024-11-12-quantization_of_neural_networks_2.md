@@ -161,7 +161,7 @@ def linear_q_symmetric(tensor, dtype=torch.int8):
 
 ![tensor_casting](../images/nn_quant2/fp32-int8-fp32_sym.png)
 
-For the original and dequantized tensors we can measure the absolute error (difference between the original and dequantized tensor):
+For the original and dequantized tensors, we can measure the absolute error (difference between the original and dequantized tensor):
 
 ![tensor_casting_err](../images/nn_quant2/quantization_err_sym.png)
 
@@ -180,18 +180,18 @@ MSE asymmetric: 3.482797622680664
 MSE symmetric: 4.056781768798828
 ```
 
-The asymmetric casting has a lower mean squared error. This is because the symmetric casting does not take into account the offset. But the difference is not that big but we needed only one number for the symmetric casting. This is a trade-off between the two methods.
+The asymmetric casting has a lower mean squared error. This is because the symmetric casting does not take into account the offset. However, the difference is not that significant, and we only needed one number for the symmetric casting. This is a trade-off between the two methods.
 
-When higher precision is needed, there are other techniques, such as choosing granularity of the quantization.
+When higher precision is needed, other techniques can be used, such as adjusting the granularity of the quantization.
 
 ## Granularity
 
-As you see, one can use one number to quantize the entire tensor. When the tensor is big and/or has large values, it's unevitable that the precision will drop. Here is the example of how the MSE grows in both cases. Let's explore the dependencies, each point is averaged on 100 tensors.
+As you see, one can use one number to quantize the entire tensor. When the tensor is big and/or has large values, it's inevitable that the precision will drop. Here is the example of how the MSE grows in both cases. Let's explore the dependencies, each point is averaged over 100 tensors.
 
 ![mse_limit](../images/nn_quant2/mse_tensor_limit.png)
 ![mse_size](../images/nn_quant2/mse_tensor_size.png)
 
-Now we used one number to cast the entire tensor. To boost the precision, one can use more numbers to cast the tensor. This is called granularity. The tensor is divided into smaller parts and each part is casted separately. This way the precision is higher. For instance we can do it per channel or even per group. Here is the visual representation of these approaches:
+Now we used one number to cast the entire tensor. To boost the precision, one can use more numbers to cast the tensor. This is called granularity. The tensor is divided into smaller parts and each part is cast separately. This way, the precision is higher. For instance, we can do it per channel or even per group. Here is the visual representation of these approaches:
 
 ![granularity_per_tensor](../images/nn_quant2/granularity_entire_tensor.png)
 ![granularity_per_channel](../images/nn_quant2/granularity_per_channel.png)
