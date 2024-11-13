@@ -175,7 +175,7 @@ print(f"MSE asymmetric: {mse_asym}")
 print(f"MSE symmetric: {mse_sym}")
 ```
 
-```console
+```bash
 MSE asymmetric: 3.482797622680664
 MSE symmetric: 4.056781768798828
 ```
@@ -315,7 +315,7 @@ print(f"MSE for per group quantization: {mse_per_group}")
 
 And the output is:
 
-```console
+```bash
 MSE for per matrix quantization: 5.178160667419434
 MSE for per channel quantization: 4.908818244934082
 MSE for per group quantization: 3.649305582046509
@@ -496,7 +496,7 @@ original_memory_footprint = model.get_memory_footprint()
 print("Footprint of the model in MBs: ", original_memory_footprint / 1e6)
 ```
 
-```console
+```bash
 Footprint of the model in MBs:  166.524032
 ```
 
@@ -561,7 +561,7 @@ print(
 plot_results(quantized_model, image, results)
 ```
 
-```console
+```bash
 Footprint of the quantized int8 model in MBs:  66.052672
 ```
 
@@ -573,7 +573,7 @@ The memory footprint of the quantized model is significantly smaller than the or
 quantized_memory_footprint / original_memory_footprint
 ```
 
-```console
+```bash
 0.3966554929441055
 ```
 
