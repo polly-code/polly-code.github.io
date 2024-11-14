@@ -9,6 +9,8 @@ tags: ["data-science","programming","python","physics","dynamics"]
 description: "Mean Squared Displacement (MSD) is one of the key characteristics to describe the dynamics of a molecule/particle/body. In short, we…"
 ---
 
+Calculating the Mean Squared Displacement (MSD) is essential for understanding the dynamics of particles, molecules, and bodies across scientific fields like physics, chemistry, and biology. MSD analysis helps in quantifying how far particles move over time, distinguishing between different types of motion, and identifying diffusion characteristics. However, for large datasets or long time trajectories, the traditional MSD calculation approach can be computationally intense, making the analysis slow and inefficient. This post explores faster approaches to MSD computation, specifically using methods like the Fast Fourier Transform (FFT) and Fast Correlation Algorithm (FCA), which reduce the time complexity from $$O(N^2)$$ to $$O(NlogN)$$. By optimizing MSD calculations, we can handle larger datasets more effectively, enabling more detailed and efficient studies in particle dynamics.
+
 [### How to speed up MSD calculations]: <> 
 
 Mean Squared Displacement ($$MSD$$) is one of the key characteristics to describe the dynamics of a molecule/particle/body[^1]. In short, we measure squared distances between positions at time points $$t$$ and $$t+dt$$ for all available time intervals ($$\Delta t$$) and then average them. We can represent it as $$MSD(\Delta t) = D* \Delta t^α$$. $$D$$_ — apparent diffusion coefficient, $$α$$ _—_ anomalous diffusion exponent. You can find the formal definition on [Wiki](https://en.wikipedia.org/wiki/Mean_squared_displacement).
