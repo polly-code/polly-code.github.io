@@ -8,7 +8,7 @@ tags: ["machine-learning","python", "quantization", "optimization", "integers"]
 description: "How to reduce the space a network takes up even further."
 ---
 
-In the previous post we discussed how to quantize a neural network to half precision floating point numbers and even 8 bits. This time, we will push the boundaries further by quantizing the network to integers, enabling us to further minimize the space it occupies. Let's get started with some theory and then we will excercise it on a few examples.
+In the previous post, we discussed how to quantize a neural network to half-precision floating point numbers and even 8 bits. This time, we will push the boundaries further by quantizing the network to integers, enabling us to further minimize the space it occupies. Let's get started with some theory and then we will exercise it on a few examples.
 
 ## Theory
 
@@ -30,15 +30,15 @@ $$
 \text{INT8} = \text{Round}(\text{max}(\text{abs}(\text{FP32})) / \text{scaling factor})
 $$
 
-Here is graphical representation of symmetric quantization:
+Here is a graphical representation of symmetric quantization:
 
 ![symm1](../images/nn_quant2/symm_cast_1.png)
 
-In this example, the scaling factor is $$6.463$$. Thus, only one number required for the casting.
+In this example, the scaling factor is $$6.463$$. Thus, only one number is required for the casting.
 
 ## Example with tensor
 
-Let's put this into practice. We will create a tensor $$(4,4)$$ with values in the range of $$[-1000, 1000]$$ and apply asymmetric casting. We will cast FP32 tensor to INT8 tensor and then back. Let's first define a few functions assist in the casting:
+Let's put this into practice. We will create a tensor $$(4,4)$$ with values in the range of $$[-1000, 1000]$$ and apply asymmetric casting. We will cast the FP32 tensor to the INT8 tensor and then back. Let's first define a few functions that assist in the casting:
 
 ```python
 import torch
