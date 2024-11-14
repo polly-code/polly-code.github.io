@@ -8,37 +8,37 @@ tags: ["machine-learning","python", "quantization", "optimization", "integers"]
 description: "How to reduce the space a network takes up even further."
 ---
 
-In the previous post we discussed how to quantize a neural network to half precision floating point numbers and even 8 bits. This time we will go even further and quantize the network to integers. This will allow us to reduce the space the network takes up even further. Let's get started with some theory and then we will excercise it on a few examples.
+In the previous post we discussed how to quantize a neural network to half precision floating point numbers and even 8 bits. This time, we will push the boundaries further by quantizing the network to integers, enabling us to further minimize the space it occupies. Let's get started with some theory and then we will excercise it on a few examples.
 
 ## Theory
 
-Casting FP32 to INT8 can be performed in two ways: symmetric and asymmetric. In the asymmetric case, the range of the floating point numbers is mapped to the range of integers, but the zero point is shifted to the middle of the range. Thus we need scaling factor and offset. First, the offset is calculated as the difference between the middle of the floating point numbers range and the zero point. Then the scaling factor is calculated as the ratio of the range of the floating point numbers to the range of integers. Finally, the floating point numbers are quantized to integers using the following formula:
+Casting FP32 to INT8 can be performed in two ways: symmetric and asymmetric. In the asymmetric method, the range of the floating-point numbers is mapped to the range of integers, with the zero point shifting to the center of the range. This requires both a scaling factor and an offset. First, the offset is calculated as the difference between the center of the floating-point number range and the zero point. Then, the scaling factor is determined by the ratio of the floating-point number range to the integer range. Finally, the floating-point numbers are quantized to integers using this formula:
 
 $$
 \text{INT8} = \text{Round}((\text{FP32} - \text{offset}) / \text{scaling factor})
 $$
-where $$\text{Round}$$ is the rounding function. INT8 is the integer representation of the floating point number FP32. Here is graphical representation of what is happening:
+where $$\text{Round}$$ represents the rounding function. INT8 is the integer representation of the floating-point number FP32.  Below is a graphical representation of this process:
 
 ![asymm1](../images/nn_quant2/asymm_cast_1.png)
 ![asymm2](../images/nn_quant2/asymm_cast_2.png)
 
-In this example we see that offset is $$221.80$$ and scaling factor is $$4.767$$. Thus for the casting we need two numbers.
+In this example, the offset is $$221.80$$, and the scaling factor is $$4.767$$. Therefore, two numbers are needed for the casting.
 
-In the symmetric case, we do not need offset. The scaling factor can be calculated as the ratio of the ranges FP32 to INT8, or as the maximum absolute value of the floating point numbers to the max of INT8. The formula for the casting is:
+In symmetric quantization, there is no need for an offset. The scaling factor is calculated as the ratio of the FP32 to INT8 ranges or as the maximum absolute value of the floating-point numbers divided by the max of INT8. The formula for casting is:
 
 $$
 \text{INT8} = \text{Round}(\text{max}(\text{abs}(\text{FP32})) / \text{scaling factor})
 $$
 
-Here is graphical representation of what is happening:
+Here is graphical representation of symmetric quantization:
 
 ![symm1](../images/nn_quant2/symm_cast_1.png)
 
-In this example we see that scaling factor is $$6.463$$. Thus for the casting we need only one number.
+In this example, the scaling factor is $$6.463$$. Thus, only one number required for the casting.
 
 ## Example with tensor
 
-Let's see how this works in practice. We will create a tensor $$(4,4)$$ with the values in the range $$[-1000, 1000]$$. We will cast it to INT8 and then back using symmetric casting. Let's first define a few functions that will help us with the casting:
+Let's put this into practice. We will create a tensor $$(4,4)$$ with values in the range of $$[-1000, 1000]$$ and apply asymmetric casting. We will cast FP32 tensor to INT8 tensor and then back. Let's first define a few functions assist in the casting:
 
 ```python
 import torch
@@ -94,7 +94,7 @@ def linear_dequantization(quantized_tensor, scale, zero_point):
     return scale * (quantized_tensor.float() - zero_point)
 ```
 
-Now we can create the tensor and quantize it:
+Now, we can create the tensor and quantize it:
 
 ```python
 # Define the range
@@ -116,11 +116,11 @@ Here is the graphical representation of tensors:
 
 ![tensor_casting](../images/nn_quant2/fp32-int8-fp32_asym.png)
 
-For the original and dequantized tensors we can measure the absolute error (difference between the original and dequantized tensor):
+For the original and dequantized tensors, we can measure the absolute error (difference between the original and dequantized tensor):
 
 ![tensor_casting_err](../images/nn_quant2/quantization_err_asym.png)
 
-The error is quite small, less than $$1%$$. Now we can perform the same operation with the symmetric casting and define a couple of functions to cast the tensor:
+The error is quite small, less than $$1%$$.  Now, let's perform the same operation with symmetric casting by defining additional functions:
 
 ```python
 def get_q_scale_symmetric(tensor, dtype=torch.int8):
@@ -161,11 +161,11 @@ def linear_q_symmetric(tensor, dtype=torch.int8):
 
 ![tensor_casting](../images/nn_quant2/fp32-int8-fp32_sym.png)
 
-For the original and dequantized tensors, we can measure the absolute error (difference between the original and dequantized tensor):
+For the original and dequantized tensors, we can measure the absolute error:
 
 ![tensor_casting_err](../images/nn_quant2/quantization_err_sym.png)
 
-To directly compare the two methods, we can calculate the mean squared error:
+To compare the two methods directly, we can calculate the mean squared error:
 
 ```python
 mse_asym = (dequantized_tensor - original_tensor).square().mean()
@@ -180,24 +180,24 @@ MSE asymmetric: 3.482797622680664
 MSE symmetric: 4.056781768798828
 ```
 
-The asymmetric casting has a lower mean squared error. This is because the symmetric casting does not take into account the offset. However, the difference is not that significant, and we only needed one number for the symmetric casting. This is a trade-off between the two methods.
+The asymmetric casting results in a lower mean squared error because it accounts for the offset. However, the difference is not significant, and symmetric casting requires fewer parameters - only one number. This presents a trade-off between the two methods.
 
-When higher precision is needed, other techniques can be used, such as adjusting the granularity of the quantization.
+When higher precision is required, you can adjust the granularity of the quantization.
 
 ## Granularity
 
-As you see, one can use one number to quantize the entire tensor. When the tensor is big and/or has large values, it's inevitable that the precision will drop. Here is the example of how the MSE grows in both cases. Let's explore the dependencies, each point is averaged over 100 tensors.
+As we have observed, it is possible to use a single number to quantize the entire tensor. However, when dealing with large tensors with vast value ranges, precision naturally diminishes. Here's an example of how Mean Squared Error (MSE) increases with increase either the size of tensor or the size of range. Let's further explore these dependencies, where each data point averaged over 100 tensors.
 
 ![mse_limit](../images/nn_quant2/mse_tensor_limit.png)
 ![mse_size](../images/nn_quant2/mse_tensor_size.png)
 
-Now we used one number to cast the entire tensor. To boost the precision, one can use more numbers to cast the tensor. This is called granularity. The tensor is divided into smaller parts and each part is cast separately. This way, the precision is higher. For instance, we can do it per channel or even per group. Here is the visual representation of these approaches:
+Instead of using a single number for the entire tensor, precision can be enhanced by employing multiple numbers. This concept is called granularity, where the tensor is divided into smaller parts, and each part undergoes separate casting. This approach improves precision. For example, casting can be done on a per-channel basis or even per group. Below is a visual representation of these approaches:
 
 ![granularity_per_tensor](../images/nn_quant2/granularity_entire_tensor.png)
 ![granularity_per_channel](../images/nn_quant2/granularity_per_channel.png)
 ![granularity_per_group](../images/nn_quant2/granularity_per_group.png)
 
-The more granular the casting is, the higher the precision. But the more numbers are needed to cast the tensor. This is a trade-off between the precision and the number of numbers needed. Let's compare the MSE for the three cases. Let's define the functions for the per channel and per group casting:
+Greater granularity results in higher precision, but it also requires more numbers for casting. This balance between precision and resource requirements needs to be weighed. Let's compare MSE for the various cases by defining the following functions:
 
 ```python
 def linear_q_symmetric_per_channel(r_tensor, dim, dtype=torch.int8):
@@ -278,7 +278,7 @@ def quantization_error(original_tensor, dequantized_tensor):
     return (original_tensor - dequantized_tensor).square().mean()
 ```
 
-Now we can cast the tensor per tensor, per channel and per group:
+Now, we can cast the tensor using granularity per tensor, per channel, and per group:
 
 ```python
 limit = 1000
@@ -323,7 +323,7 @@ MSE for per group quantization: 3.649305582046509
 
 ## Example with a neural network
 
-For the demonstration we will use encoder-decoder transformer `detr-resnet-50` neural network for object detection. We will quantize the network to INT8 using the symmetric casting and compare the result with the original model predictions. As usual let's first define the functions to quantize the network:
+For demonstration, we will use an encoder-decoder transformer, `detr-resnet-50`, for object detection. We will quantize the network to INT8 using symmetric casting and compare the results with the original model predictions. First, let's define functions to quantize the network:
 
 ```python
 def w8_a16_forward(weight, input_data, scales, bias=None):
@@ -482,7 +482,7 @@ def fetch_image(image_url):
     return image
 ```
 
-Now let's download the model from huggingface. You need to add `HF_TOKEN` when you run the notebook. 
+Next, let's download the model from Hugging Face. Remember to add your `HF_TOKEN` when running the notebook.
     
 ```python
 model_name = "facebook/detr-resnet-50"
@@ -500,7 +500,7 @@ print("Footprint of the model in MBs: ", original_memory_footprint / 1e6)
 Footprint of the model in MBs:  166.524032
 ```
 
-Now we can download the image:
+Let's now download the image:
 
 ```python
 img_path ="https://cdn.pixabay.com/photo/2020/08/25/18/29/workplace-5517762_1280.jpg"
@@ -510,7 +510,7 @@ image
 
 ![Workplace Image](https://cdn.pixabay.com/photo/2020/08/25/18/29/workplace-5517762_1280.jpg)
 
-And perform the object detection:
+Now, let's perform object detection:
 
 ```python
 inputs = processor(images=image, return_tensors="pt")
@@ -528,7 +528,7 @@ plot_results(model, image, results)
 
 ![Workplace Image with Bounding Boxes](../images/nn_quant2/original_model_detection.png)
 
-Now we can quantize the model and perform the object detection again:
+Next, we quantize the model and perform object detection again:
 
 ```python
 quantized_model = deepcopy(model).to(device).half()
@@ -567,7 +567,7 @@ Footprint of the quantized int8 model in MBs:  66.052672
 
 ![Workplace Image with Bounding Boxes](../images/nn_quant2/quantized_model_detection.png)
 
-The memory footprint of the quantized model is significantly smaller than the original model:
+The memory footprint of the quantized model is significantly smaller than that of the original model:
 
 ```python
 quantized_memory_footprint / original_memory_footprint
@@ -577,14 +577,14 @@ quantized_memory_footprint / original_memory_footprint
 0.3966554929441055
 ```
 
-The quantized model is around 40% of the original model. The object detection results are almost the same. This is a great way to reduce the memory footprint of the model without losing much accuracy.
+The quantized model occupies approximately 40% of the original model's space, yet the object detection results remain nearly identical. This is an excellent technique for reducing a model's memory footprint without sacrificing much accuracy.
 
 ## Conclusion
 
-In this post we discussed how to quantize a neural network to integers. We discussed the symmetric and asymmetric casting and how to calculate the scaling factor and offset. We also discussed the granularity of the casting and how it affects the precision. We demonstrated the quantization on a tensor and a neural network. The quantized model had a significantly smaller memory footprint than the original model, while the object detection results were almost the same. This is a great way to reduce the memory footprint of the model without losing much accuracy. In the next post we will discuss how to quantize the network to binary numbers.
+In this post, we explored how to quantize a neural network to integers. We covered symmetric and asymmetric casting, as well as calculating the scaling factor and offset. We also delved into the granularity of casting and its impact on precision. We demonstrated quantization on a tensor and a neural network, noting that the quantized model had a significantly smaller memory footprint than the original, with negligible differences in object detection results. This offers a great approach to minimizing a model's memory footprint while maintaining accuracy. In our next post, we'll discuss quantizing networks to binary numbers.
 
-Important to note that on Hugging Face you can find the quantized models already. You can use them directly without the need to quantize the model yourself. But it's good to know how it works under the hood.
+Importantly, pre-quantized models are readily available on Hugging Face, allowing you to use them directly without the need for self-quantization. However, understanding the mechanics can enhance one’s comprehension of what happens behind the scenes.
 
 For the convenience of the reader, the full code can be found in the [Google colab notebook](https://colab.research.google.com/drive/1pnkBqw1X0hcpsrj92zQQL16hZU6fs8Bv?usp=sharing).
 
-I hope you enjoyed this post and learned something new. If you have any questions or suggestions, please feel free to reach out to me on [LinkedIn](https://www.linkedin.com/in/pavel-kos/). Thank you for reading!
+I hope you enjoyed this post and learned something new. If you have any questions or suggestions, feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/pavel-kos/). Thank you for reading!
