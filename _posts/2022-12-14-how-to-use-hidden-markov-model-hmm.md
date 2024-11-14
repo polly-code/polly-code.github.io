@@ -8,6 +8,8 @@ tags: ["stochastic-modelling","machine-learning","python"]
 description: "Calling HMM on your data in python."
 ---
 
+Hidden Markov Models (HMMs) are a powerful tool for analyzing data where hidden states influence observed outcomes. Imagine tracking how much fuel you use based on which gas station you visit; each station (state) has its own effect on fuel efficiency. By setting up an HMM with two states, we can train the model to identify these underlying states in the data. In this guide, I'll show you how to set up and use an HMM in Python with the hmmlearn package, and how it can reveal patterns in data that might otherwise stay hidden.
+
 [### How to use Hidden Markov Model (HMM)]: <> 
 
 Calling HMM on your data in python.
@@ -16,17 +18,14 @@ Given a dependence $$A(x)$$ , the Hidden Markov Model assigns every point to one
 
 For instance, car fuel consumption depends on the gas station. Imagine you have data on how much fuel you have spent per every $$100$$ km ($$\sim 62$$ miles). Let’s plot it.
 
-
-![](../images/31d296cfefdc/1*Zr0gfSIYXEhNoHJ-liyJUA.png)
-
+![gt](../images/31d296cfefdc/1*Zr0gfSIYXEhNoHJ-liyJUA.png)
 
 If we know that we use two gas stations. We can create a model with two states. Let’s train and apply it to our data. I use the python package `hmmlearn`. When generating the data, I recorded the ground truth, so now we can compare prediction and the ground truth.
 
-
-![](../images/31d296cfefdc/1*qjD92C5Os8AoYJ2rDTfw7A.png)
-
+![pred](../images/31d296cfefdc/1*qjD92C5Os8AoYJ2rDTfw7A.png)
 
 Of course, when the noise is high, it might be hard to distinguish a state precisely.
+
 ### What is inside?
 
 I mentioned that the model contains two states. A state corresponds to a normal distribution with a well-defined mean and standard deviation. This is a very strong assumption: the data within each state should be distributed normally. Also, we can go from one state to the other and back. We define the transition matrix: probabilities of staying in state $$1$$, $$2$$ and going $$1 \to 2$$, $$2 \to 1$$. At every step, we calculate what is better: to stay in a current state or go to the other one. We minimize the loss function by repeating this simulation many times.
@@ -34,6 +33,7 @@ I mentioned that the model contains two states. A state corresponds to a normal 
 The idea is similar when we have more states.
 
 Below you can find some python code to reproduce.
+
 ```python
 import numpy as np
 from hmmlearn import hmm

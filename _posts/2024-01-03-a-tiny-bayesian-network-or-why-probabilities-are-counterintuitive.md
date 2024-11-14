@@ -8,6 +8,8 @@ tags: ["bayesian-statistics","statistics","data-science","puzzle"]
 description: "I want to share an interesting experiment I found in “The Book of Why” by Judea Pearl and Dana Mackenzie."
 ---
 
+I recently came across a fascinating example in The Book of Why by Judea Pearl and Dana Mackenzie that really made me think about how counterintuitive probability can be. The setup is simple: you’re on a trip to Zanzibar with a tight connection in Frankfurt, and the question is whether your luggage will actually make it to your final destination. There’s a 50% chance your bag makes the transfer and, if it does, a certain chance you’ll see it on the carousel within the first few minutes. Seems straightforward, right? But as I started running through the probabilities in my head, I realized just how easily our intuitions can lead us astray. In this post, I’ll take you through the Bayesian approach to this scenario and show how it helps clarify a problem that feels almost paradoxical at first glance. Let’s dive in and see why waiting for luggage is a perfect puzzle for understanding the quirks of probability.
+
 [### A tiny Bayesian network or why probabilities are counterintuitive]: <> 
 
 I want to share an interesting experiment I found in [“The Book of Why” by Judea Pearl and Dana Mackenzie](https://amzn.to/3XreaOD).
