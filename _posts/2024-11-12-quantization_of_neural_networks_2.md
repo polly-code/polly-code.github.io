@@ -186,7 +186,7 @@ When higher precision is required, you can adjust the granularity of the quantiz
 
 ## Granularity
 
-As we have observed, it is possible to use a single number to quantize the entire tensor. However, when dealing with large tensors with vast value ranges, precision naturally diminishes. Here's an example of how Mean Squared Error (MSE) increases with increase either the size of tensor or the size of range. Let's further explore these dependencies, where each data point averaged over 100 tensors.
+As we have observed, it is possible to use a single number to quantize the entire tensor. However, when dealing with large tensors with vast value ranges, precision naturally diminishes. Here's an example of how Mean Squared Error (MSE) increases with an increase in either the size of the tensor or the size of the range. Let's further explore these dependencies, where each data point averaged over 100 tensors.
 
 ![mse_limit](../images/nn_quant2/mse_tensor_limit.png)
 ![mse_size](../images/nn_quant2/mse_tensor_size.png)
@@ -197,7 +197,7 @@ Instead of using a single number for the entire tensor, precision can be enhance
 ![granularity_per_channel](../images/nn_quant2/granularity_per_channel.png)
 ![granularity_per_group](../images/nn_quant2/granularity_per_group.png)
 
-Greater granularity results in higher precision, but it also requires more numbers for casting. This balance between precision and resource requirements needs to be weighed. Let's compare MSE for the various cases by defining the following functions:
+Finer granularity results in higher precision, but it also requires more numbers for casting. This balance between precision and resource requirements needs to be weighed. Let's compare MSE for the various cases by defining the following functions:
 
 ```python
 def linear_q_symmetric_per_channel(r_tensor, dim, dtype=torch.int8):
